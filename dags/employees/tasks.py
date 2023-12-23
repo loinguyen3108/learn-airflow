@@ -22,7 +22,7 @@ def get_data():
     cur = conn.cursor()
     with open(data_path, "r") as file:
         cur.copy_expert(
-            "COPY employees_temp FROM STDIN WITH CSV HEADER DELIMITER AS ',' QUOTE '\"'",
+            "COPY tutorial.employees_temp FROM STDIN WITH CSV HEADER DELIMITER AS ',' QUOTE '\"'",
             file,
         )
     conn.commit()
@@ -30,11 +30,11 @@ def get_data():
 @task
 def merge_data():
     query = """
-        INSERT INTO employees
+        INSERT INTO tutorial.employees
         SELECT *
         FROM (
             SELECT DISTINCT *
-            FROM employees_temp
+            FROM tutorial.employees_temp
         ) t
         ON CONFLICT ("Serial Number") DO UPDATE
         SET
