@@ -3,8 +3,8 @@ import datetime
 import pendulum
 from airflow.decorators import dag
 
-from employees.prepare_table import create_employees_table, create_employees_temp_table
-from employees.tasks import get_data, merge_data
+from dags.employees.prepare_table import create_employees_table, create_employees_temp_table
+from dags.employees.tasks import get_data, merge_data
 
 @dag(
     dag_id='process-employees',
