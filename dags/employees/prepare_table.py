@@ -20,7 +20,7 @@ create_employees_table = PostgresOperator(
 
 create_employees_temp_table_query = """
     DROP TABLE IF EXISTS tutorial.employees_temp;
-    CREATE TABLE employees_temp (
+    CREATE TABLE tutorial.employees_temp (
         "Serial Number" NUMERIC PRIMARY KEY,
         "Company Name" TEXT,
         "Employee Markme" TEXT,
