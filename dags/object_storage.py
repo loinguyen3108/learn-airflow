@@ -68,7 +68,7 @@ def tutorial_objectstorage():
         formatted_date = execution_date.format("YYYYMMDD")
         path = base / f"air_quality_{formatted_date}.parquet"
 
-        df = pd.DataFrame(response.json()).astype(aq_fields)
+        df = pd.DataFrame(response.json())
         with path.open("wb") as file:
             df.to_parquet(file)
 
