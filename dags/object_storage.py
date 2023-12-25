@@ -1,8 +1,9 @@
+import io
 import pendulum
 import requests
 
 from airflow.decorators import dag, task
-from airflow.io.path import ObjectStoragePath
+from airflow.providers.google.cloud.hooks.gcs import GCSHook
 
 API = "https://opendata.fmi.fi/timeseries"
 
@@ -18,7 +19,6 @@ aq_fields = {
     "NO2_PT1H_avg": "float64",
     "TRSC_PT1H_avg": "float64",
 }
-base = ObjectStoragePath("gs://louis-airflow-tutorial/", conn_id="tutorial_gcp")
 
 
 @dag(
@@ -36,7 +36,7 @@ def tutorial_objectstorage():
     [here](https://airflow.apache.org/docs/apache-airflow/stable/tutorial/objectstorage.html)
     """
     @task
-    def get_air_quality_data(**kwargs) -> ObjectStoragePath:
+    def get_air_quality_data(**kwargs):
         """
         #### Get Air Quality Data
         This task gets air quality data from the Finnish Meteorological Institute's
@@ -63,14 +63,16 @@ def tutorial_objectstorage():
         response.raise_for_status()
 
         # ensure the bucket exists
-        base.mkdir(exist_ok=True)
+        gcs_hook = GCSHook(gcp_conn_id='tutorial_gcp')
+        if not gcs_hook.list('louis-airflow-tutorial'):
+            raise Exception("Bucket 'louis-airflow-tutorial' does not exist")
 
         formatted_date = execution_date.format("YYYYMMDD")
-        path = base / f"air_quality_{formatted_date}.parquet"
+        path = f"air_quality_{formatted_date}.parquet"
 
         df = pd.DataFrame(response.json())
-        with path.open("wb") as file:
-            df.to_parquet(file)
+        gcs_hook.upload(bucket_name='louis-airflow-tutorial', object_name=path, data=df.to_parquet())
+        
 
     get_air_quality_data()
 tutorial_objectstorage()
